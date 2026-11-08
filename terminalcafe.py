@@ -9,6 +9,7 @@ import time
 
 APP_VERSION = "0.1"
 SCENES = ["AI Python Session", "Code Rain", "Build Monitor", "Creative Tools", "Brew", "Exit"]
+KONAMI_CODE = ("UP", "UP", "DOWN", "DOWN", "LEFT", "RIGHT", "LEFT", "RIGHT", "b", "a")
 FPS = 18
 
 
@@ -76,8 +77,8 @@ def new_canvas(width, height):
 
 def render(title, subtitle, canvas, colors, footer):
     output = ["\x1b[H\x1b[2J\x1b[1;38;2;235;238;250m", title, "\x1b[0m\n\x1b[38;2;145;157;180m", subtitle, "\x1b[0m\n"]
-    active = None
     for y, row in enumerate(canvas):
+        active = None
         for x, char in enumerate(row):
             color = colors.get((x, y))
             if color != active:
@@ -85,7 +86,6 @@ def render(title, subtitle, canvas, colors, footer):
                 active = color
             output.append(char)
         output.extend(["\x1b[0m\n"])
-        active = None
     output.extend(["\x1b[38;2;120;132;153m", footer, "\x1b[0m"])
     sys.stdout.write("".join(output))
     sys.stdout.flush()
@@ -213,10 +213,8 @@ def run_creative_tools():
 def run_brew():
     """Continuously pour hot coffee into a mug, then let it empty and repeat."""
     cycle_seconds, pour_seconds = 18.0, 7.0
-    coffee = (154, 91, 48)
-    dark_coffee = (104, 57, 34)
-    cream = (220, 174, 111)
-    porcelain = (198, 211, 226)
+    coffee, dark_coffee = (154, 91, 48), (104, 57, 34)
+    cream, porcelain = (220, 174, 111), (198, 211, 226)
 
     def draw(frame):
         width, rows = shutil.get_terminal_size((80, 24))
@@ -225,14 +223,11 @@ def run_brew():
         cx = width // 2
         seconds = (frame / FPS) % cycle_seconds
         if seconds < pour_seconds:
-            fill = min(1.0, seconds / pour_seconds)
-            pouring = True
+            fill, pouring = min(1.0, seconds / pour_seconds), True
         elif seconds < pour_seconds + 3.0:
             fill, pouring = 1.0, False
         else:
-            fill = max(0.0, 1.0 - (seconds - pour_seconds - 3.0) / (cycle_seconds - pour_seconds - 3.0))
-            pouring = False
-
+            fill, pouring = max(0.0, 1.0 - (seconds - pour_seconds - 3.0) / (cycle_seconds - pour_seconds - 3.0)), False
         mug_height = min(9, max(5, height // 2))
         top = max(6, min(height - mug_height - 1, height // 2 - mug_height // 2 + 2))
         left, right = cx - 10, cx + 9
@@ -249,7 +244,6 @@ def run_brew():
                 draw_text(canvas, colors, pour_x, y, char, coffee if char != "o" else cream)
             for dx, char in [(-2, "."), (-1, "\\"), (0, "~"), (1, "/"), (2, ".")]:
                 draw_text(canvas, colors, pour_x + dx, top, char, cream if dx == 0 else coffee)
-
         draw_text(canvas, colors, left, top, " .-----------------.", porcelain)
         draw_text(canvas, colors, left, top + 1, "|                   |", porcelain)
         for y in range(top + 2, bottom):
@@ -259,7 +253,6 @@ def run_brew():
         draw_text(canvas, colors, right + 2, top + 4, ")", porcelain)
         draw_text(canvas, colors, right + 1, top + 5, "/", porcelain)
         draw_text(canvas, colors, left + 1, bottom, " '-----------------'", porcelain)
-
         inner_top, inner_bottom = top + 1, bottom - 1
         inside_height = max(1, inner_bottom - inner_top)
         liquid_rows = round(fill * inside_height)
@@ -272,7 +265,6 @@ def run_brew():
             for x in range(left + 2, right - 1):
                 wave = "~" if (x + frame // 3) % 5 else "-"
                 draw_text(canvas, colors, x, surface_y, wave, cream)
-
         if fill > .55 and not pouring:
             steam = ("  ~       ~  ", " ~ ~     ~ ~ ", "~   ~   ~   ~")
             for strand, line in enumerate(steam):
@@ -283,18 +275,78 @@ def run_brew():
     animate(draw)
 
 
+def run_konami_secret():
+    """A playful secret scene unlocked by the classic Konami Code."""
+    loop = FPS * 12
+    stars = [(i * 37 + 5, i * 19 + 3, i % 5) for i in range(72)]
+
+    def draw(frame):
+        width, rows = shutil.get_terminal_size((80, 24))
+        width, height = max(32, width), max(10, rows - 3)
+        canvas, colors = new_canvas(width, height)
+        cx, cy = width // 2, height // 2
+        phase = 2 * math.pi * (frame % loop) / loop
+        for i, (sx, sy, speed) in enumerate(stars):
+            x = (sx + frame * (1 + speed) // 2) % width
+            y = (sy + frame // (2 + speed)) % height
+            draw_text(canvas, colors, x, y, ".:*+"[(i + frame // 3) % 4], (85 + speed * 20, 115 + speed * 15, 210 + speed * 8))
+        for radius, symbol in ((.18, "."), (.28, ":"), (.38, "+")):
+            for point in range(100):
+                angle = 2 * math.pi * point / 100 + phase * (1 if radius == .28 else -1)
+                x, y = round(cx + math.cos(angle) * width * radius), round(cy + math.sin(angle) * height * radius)
+                draw_text(canvas, colors, x, y, symbol, (95, 105, 212))
+        bob = round(math.sin(phase * 2) * 2)
+        draw_text(canvas, colors, cx - 15, cy - 2 + bob, "  /\\   /\\  ", (255, 220, 117))
+        draw_text(canvas, colors, cx - 15, cy - 1 + bob, " (    V    ) ", (255, 220, 117))
+        draw_text(canvas, colors, cx - 15, cy + bob, "  \\  ___  /  ", (255, 220, 117))
+        draw_text(canvas, colors, cx - 15, cy + 1 + bob, "   \\_____/   ", (255, 220, 117))
+        title = "SECRET UNLOCKED"
+        draw_text(canvas, colors, cx - len(title) // 2, max(0, cy - 7), title, (255, 192, 87))
+        message = "KONAMI COSMIC CAFE"
+        draw_text(canvas, colors, cx - len(message) // 2, min(height - 1, cy + 6), message, (184, 159, 255))
+        render("TerminalCafe  /  ???", "A little arcade sparkle, just for you", canvas, colors, "Secret scene  |  q / Esc / Ctrl+C: return to menu")
+    animate(draw)
+
+
 def menu():
     selected = 0
+    sequence = []
+    descriptions = {
+        "AI Python Session": "A fictional code session types itself, then quietly loops.",
+        "Code Rain": "Synthetic source characters fall in softly glowing streams.",
+        "Build Monitor": "A pretend workshop pipeline cycles through its stages.",
+        "Creative Tools": "Orbiting tools, trails, and glints make a layered motion scene.",
+        "Brew": "Coffee pours into a mug, steams, drains, and starts again.",
+        "Exit": "Leave TerminalCafe and restore your terminal.",
+    }
+    actions = {"AI Python Session": run_ai_session, "Code Rain": run_code_rain,
+               "Build Monitor": run_build_monitor, "Creative Tools": run_creative_tools,
+               "Brew": run_brew}
     while True:
         width, rows = shutil.get_terminal_size((80, 24))
         canvas, colors = new_canvas(max(width, 32), max(rows - 3, 8))
-        draw_text(canvas, colors, 3, 1, "A terminal screensaver pack for curious minds", (144, 164, 195))
+        draw_text(canvas, colors, 3, 1, "        (  )   (   )   (  )", (187, 139, 94))
+        draw_text(canvas, colors, 3, 2, "         ) (     ) (     ) (", (187, 139, 94))
+        draw_text(canvas, colors, 3, 4, "A little warmth for your terminal.", (144, 164, 195))
         for i, scene in enumerate(SCENES):
-            draw_text(canvas, colors, 4, 4 + i * 2, ("> " if i == selected else "  ") + scene,
+            draw_text(canvas, colors, 4, 7 + i * 2, ("> " if i == selected else "  ") + scene,
                       (255, 197, 112) if i == selected else (205, 213, 227))
-        draw_text(canvas, colors, 4, min(len(canvas) - 1, 4 + len(SCENES) * 2), "W/S or arrows: select   Enter: start   q: quit", (130, 146, 170))
-        render(f"TerminalCafe  v{APP_VERSION}", "Choose a scene", canvas, colors, "Scenes loop until you leave them")
+        description_y = min(len(canvas) - 3, 8 + len(SCENES) * 2)
+        draw_text(canvas, colors, 4, description_y, descriptions[SCENES[selected]], (144, 164, 195))
+        controls_y = min(len(canvas) - 1, description_y + 2)
+        draw_text(canvas, colors, 4, controls_y, "↑/↓ or W/S select   Enter start   q quit", (130, 146, 170))
+        render(f"TerminalCafe  v{APP_VERSION}", "Press Enter to begin your break", canvas, colors,
+               "Konami Code: ↑ ↑ ↓ ↓ ← → ← → B A")
         key = poll_key()
+        if key is None:
+            time.sleep(0.04)
+            continue
+        sequence.append(key.lower() if key.lower() in ("a", "b") else key)
+        sequence = sequence[-len(KONAMI_CODE):]
+        if tuple(sequence) == KONAMI_CODE:
+            sequence.clear()
+            run_konami_secret()
+            continue
         if key in ("q", "Q", "ESC", "\x03"):
             return
         if key in ("UP", "w", "W"):
@@ -302,14 +354,11 @@ def menu():
         elif key in ("DOWN", "s", "S"):
             selected = (selected + 1) % len(SCENES)
         elif key in ("\r", "\n", "ENTER"):
-            action = {"AI Python Session": run_ai_session, "Code Rain": run_code_rain,
-                      "Build Monitor": run_build_monitor, "Creative Tools": run_creative_tools,
-                      "Brew": run_brew}.get(SCENES[selected])
-            if action:
-                action()
-            elif SCENES[selected] == "Exit":
+            scene = SCENES[selected]
+            if scene in actions:
+                actions[scene]()
+            elif scene == "Exit":
                 return
-        time.sleep(0.04)
 
 
 def main():
