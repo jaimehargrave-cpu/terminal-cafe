@@ -5,14 +5,15 @@ TerminalCafe is a terminal-first screensaver pack for:
 - Windows 8.1+
 - Debian 10+
 
-It presents a fake AI that types Python commands into a terminal, but never executes them. While the screensaver is active, the machine stays awake, then releases the sleep lock when the user exits.
+TerminalCafe is a collection of custom, coding-themed terminal screensavers—not just a fake AI typing demo. It offers multiple selectable visual modes, including an AI-style Python typing scene, code rain, and a simulated build monitor. These scenes are visual animations: displayed text is not executed. While a screensaver is active, TerminalCafe is intended to keep the machine awake and release that request when the scene exits.
 
 ## Features
 - Terminal menu with a `>` selection indicator
-- Coding-themed screensaver modes
-- Fake AI command generation with no actual execution
-- Sleep inhibition while the screensaver is active
-- Cross-platform support for macOS, Windows, and Debian
+- Multiple coding-themed screensaver modes
+- AI-style Python typing animation; displayed commands are never executed
+- Code-rain and simulated build-monitor scenes
+- Stay-awake behavior while a screensaver is active
+- Cross-platform goals: macOS, Windows, and Debian
 
 ## Screensaver modes
 - AI Python Session
@@ -27,4 +28,4 @@ python3 terminalcafe.py
 ```
 
 ## Notes
-This project is intentionally a screen-saver experience rather than a real terminal automation tool.
+TerminalCafe is a terminal-based screensaver experience. Its animated scenes display text only and do not run the commands shown.
