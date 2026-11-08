@@ -7,6 +7,7 @@ import shutil
 import sys
 import time
 
+APP_VERSION = "0.1"
 SCENES = ["AI Python Session", "Code Rain", "Build Monitor", "Creative Tools", "Brew", "Exit"]
 FPS = 18
 
@@ -234,26 +235,21 @@ def run_brew():
 
         mug_height = min(9, max(5, height // 2))
         top = max(6, min(height - mug_height - 1, height // 2 - mug_height // 2 + 2))
-        left = cx - 10
-        right = cx + 9
+        left, right = cx - 10, cx + 9
         bottom = min(height - 1, top + mug_height)
-
-        # A small coffee pot and its spout establish the source of the stream.
         pot_x = cx - 12
         draw_text(canvas, colors, pot_x, 1, " .--------.", cream)
         draw_text(canvas, colors, pot_x, 2, "(  BREW   )___", cream)
         draw_text(canvas, colors, pot_x, 3, " `--------'   \\", cream)
         pour_x = cx + 3
         if pouring:
-            stream_top = 4
-            for y in range(stream_top, top):
+            for y in range(4, top):
                 phase = (frame + y * 3) % 12
                 char = "o" if phase < 2 else ("." if phase < 5 else "|")
                 draw_text(canvas, colors, pour_x, y, char, coffee if char != "o" else cream)
             for dx, char in [(-2, "."), (-1, "\\"), (0, "~"), (1, "/"), (2, ".")]:
                 draw_text(canvas, colors, pour_x + dx, top, char, cream if dx == 0 else coffee)
 
-        # Mug rim, body, and a thin curved handle.
         draw_text(canvas, colors, left, top, " .-----------------.", porcelain)
         draw_text(canvas, colors, left, top + 1, "|                   |", porcelain)
         for y in range(top + 2, bottom):
@@ -277,7 +273,6 @@ def run_brew():
                 wave = "~" if (x + frame // 3) % 5 else "-"
                 draw_text(canvas, colors, x, surface_y, wave, cream)
 
-        # Steam curls drift independently above a hot, filled mug.
         if fill > .55 and not pouring:
             steam = ("  ~       ~  ", " ~ ~     ~ ~ ", "~   ~   ~   ~")
             for strand, line in enumerate(steam):
@@ -285,7 +280,6 @@ def run_brew():
                 draw_text(canvas, colors, cx - 7 + shift, top - 4 + strand, line, (160, 174, 190))
         draw_text(canvas, colors, max(0, cx - 8), min(height - 1, bottom + 2), "B R E W   /   F R E S H   C O F F E E", (190, 157, 121))
         render("TerminalCafe  /  BREW", "A fresh cup, poured slowly in a continuous loop", canvas, colors, "Coffee pours, settles, and refills  |  q / Esc / Ctrl+C: return to menu")
-
     animate(draw)
 
 
@@ -299,7 +293,7 @@ def menu():
             draw_text(canvas, colors, 4, 4 + i * 2, ("> " if i == selected else "  ") + scene,
                       (255, 197, 112) if i == selected else (205, 213, 227))
         draw_text(canvas, colors, 4, min(len(canvas) - 1, 4 + len(SCENES) * 2), "W/S or arrows: select   Enter: start   q: quit", (130, 146, 170))
-        render("TerminalCafe", "Choose a scene", canvas, colors, "Scenes loop until you leave them")
+        render(f"TerminalCafe  v{APP_VERSION}", "Choose a scene", canvas, colors, "Scenes loop until you leave them")
         key = poll_key()
         if key in ("q", "Q", "ESC", "\x03"):
             return
