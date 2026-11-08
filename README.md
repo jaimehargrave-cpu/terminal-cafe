@@ -1,31 +1,23 @@
 # TerminalCafe
 
-TerminalCafe is a terminal-first screensaver pack for:
-- macOS Ventura+
-- Windows 8.1+
-- Debian 10+
+TerminalCafe is a terminal-first screensaver pack for macOS, Windows, and Linux. It brings a little motion and color to a developer's terminal with several selectable scenes.
 
-TerminalCafe is a collection of custom, coding-themed terminal screensavers—not just a fake AI typing demo. It offers multiple selectable visual modes, including an AI-style Python typing scene, code rain, and a simulated build monitor. These scenes are visual animations: displayed text is not executed. While a screensaver is active, TerminalCafe is intended to keep the machine awake and release that request when the scene exits.
+## Screensaver scenes
+- **AI Python Session** — simulated code typing; displayed text is never executed.
+- **Code Rain** — a stream of synthetic source snippets.
+- **Build Monitor** — a mock build pipeline animation.
+- **Creative Tools** — a colorful, seamless 12-second loop with several independently moving tool-like shapes. Their orbital paths, orientations, trails, and highlights animate simultaneously.
 
-## Features
-- Terminal menu with a `>` selection indicator
-- Multiple coding-themed screensaver modes
-- AI-style Python typing animation; displayed commands are never executed
-- Code-rain and simulated build-monitor scenes
-- Stay-awake behavior while a screensaver is active
-- Cross-platform goals: macOS, Windows, and Debian
+Creative Tools is an original terminal-native kinetic animation, using layered motion and abstract ASCII forms rather than reproducing proprietary artwork.
 
-## Screensaver modes
-- AI Python Session
-- Code Rain
-- Build Monitor
-- Exit
+## Run
 
-## Usage
+Python 3 is required; no third-party packages are needed.
 
 ```bash
 python3 terminalcafe.py
 ```
 
-## Notes
-TerminalCafe is a terminal-based screensaver experience. Its animated scenes display text only and do not run the commands shown.
+Use the arrow keys or W/S to navigate, then press Enter. In any scene, press **Ctrl+C** to return to the menu; press **q** from the menu to quit.
+
+The scenes are visual simulations only. They do not execute the commands or build steps they display.
